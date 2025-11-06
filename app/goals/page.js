@@ -17,6 +17,21 @@ export default function SparemålPage() {
     setGoals((prev) => [...prev, newGoal]);
     setShowNewModal(false);
   };
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const error = await res.json();
+        alert("Feil ved sletting: " + error.error);
+        return;
+      }
+      setGoals((prev) => prev.filter((g) => g._id !== id));
+      router.refresh();
+    } catch (err) {
+      console.error("Sletting feilet:", err);
+      alert("Uventet feil ved sletting.");
+    }
+  };
 
   useEffect(() => {
     const fetchGoals = async () => {
@@ -51,6 +66,7 @@ export default function SparemålPage() {
       >
         + Nytt mål
       </button>
+
       {showNewModal && (
         <NewGoalModal
           onClose={() => setShowNewModal(false)}
@@ -66,7 +82,11 @@ export default function SparemålPage() {
         <ul className="space-y-4">
           {goals.map((goal) => (
             <li key={goal._id}>
-              <GoalCard goal={goal} onEdit={() => setEditingGoal(goal)} />
+              <GoalCard
+                goal={goal}
+                onEdit={() => setEditingGoal(goal)}
+                onDelete={handleDelete}
+              />
             </li>
           ))}
         </ul>

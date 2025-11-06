@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function GoalCard({ goal, onSave }) {
+export default function GoalCard({ goal, onSave, onEdit, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(goal.title);
   const [targetAmount, setTargetAmount] = useState(goal.targetAmount);
@@ -100,8 +100,20 @@ export default function GoalCard({ goal, onSave }) {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-xs text-gray-400 text-right">{Math.round(progress)}%</p>
+          <p className="text-xs text-gray-400 text-right">
+            {Math.round(progress)}%
+          </p>
 
+          <button
+            onClick={() => {
+              if (confirm("Er du sikker på at du vil slette dette målet?")) {
+                onDelete?.(goal._id);
+              }
+            }}
+            className="text-red-400 hover:text-red-500 text-sm float-end ml-4"
+          >
+            Slett
+          </button>
           <div className="flex justify-end">
             <button
               onClick={() => setEditing(true)}
@@ -112,7 +124,6 @@ export default function GoalCard({ goal, onSave }) {
           </div>
         </>
       )}
-      
     </div>
   );
 }
