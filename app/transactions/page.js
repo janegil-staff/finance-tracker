@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function TransactionsPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     type: "expense",
     amount: "",
@@ -21,12 +23,13 @@ export default function TransactionsPage() {
     const res = await fetch("/api/transactions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, user: "user-id-placeholder" }),
+      body: JSON.stringify({...form}),
     });
 
     if (res.ok) {
       alert("Transaksjon lagret!");
-      setForm({ ...form, amount: "", category: "", note: "" });
+      setForm({ ...form, amount: "", category: "", description: "" });
+      router.push("/dashboard"); 
     } else {
       alert("Feil ved lagring");
     }
@@ -85,16 +88,24 @@ export default function TransactionsPage() {
           >
             <option value="">Velg kategori</option>
             <option value="Mat">Mat</option>
+            <option value="Daglivarer">Daglivarer</option>
             <option value="Transport">Transport</option>
             <option value="Helse">Helse</option>
             <option value="Gaver">Gaver</option>
             <option value="Bolig">Bolig</option>
-            <option value="Bolig">Vin</option>
-            <option value="Bolig">Røyk</option>
-            <option value="Bolig">Snop</option>
-            <option value="Bolig">Sparing</option>
-            <option value="Bolig">Strøm</option>
-            <option value="Bolig">Regning</option>
+            <option value="Vin">Vin</option>
+            <option value="Alkohol">Alkohol</option>
+            <option value="Røyk">Røyk</option>
+            <option value="Snop">Snop</option>
+            <option value="Sparing">Sparing</option>
+            <option value="Strøm">Strøm</option>
+            <option value="Regninger">Regninger</option>
+            <option value="Klær">Klær</option>
+            <option value="Medisiner">Medisiner</option>
+            <option value="Investeringer">Investeringer</option>
+            <option value="Abonnomanger">Abonnomanger</option>
+            <option value="Husleie">Husleie</option>
+            <option value="Narkotika">Narkotika</option>
           </select>
 
           {/* Note */}

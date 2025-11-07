@@ -26,7 +26,7 @@ export default function SparemålPage() {
         return;
       }
       setGoals((prev) => prev.filter((g) => g._id !== id));
-      router.refresh();
+       router.push("/dashboard"); 
     } catch (err) {
       console.error("Sletting feilet:", err);
       alert("Uventet feil ved sletting.");

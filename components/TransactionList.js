@@ -2,9 +2,9 @@
 import { useState, useMemo, useEffect } from "react";
 import TransactionFilter from "./TransactionFilter";
 
-export default function TransactionList() {
+export default function TransactionList({transactions}) {
   const [filters, setFilters] = useState({ type: "all", search: "" });
-  const [transactions, setTransactions] = useState([]);
+  const [transaction, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
 
   useEffect(() => {

@@ -54,7 +54,7 @@ export default function MonthlySummary({ transactions }) {
                 }`}
               >
                 {net >= 0 ? "+" : ""}
-                {net} kr
+                {net.toFixed(2)} kr
               </span>
             </li>
           ))}

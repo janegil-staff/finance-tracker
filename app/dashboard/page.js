@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 
 import GoalItem from "@/components/GoalItem";
 import AddGoalWrapper from "@/components/AddGoalWrapper";
@@ -15,6 +14,7 @@ import Transaction from "@/models/Transaction";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
+
   if (!session || !session.user?.id) redirect("/login");
 
   await connectDB();
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
             <h2 className="text-xl font-semibold">Transaksjoner</h2>
             <AddTransactionWrapper />
           </div>
-          <TransactionList transactions={transactions} />
+          <TransactionList transactions={transactions}/>
         </section>
       </div>
     </main>
