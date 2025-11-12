@@ -1,36 +1,57 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+
+import { useState, useMemo, useEffect, useRef } from "react";
 import TransactionFilter from "./TransactionFilter";
 
-export default function TransactionList({transactions}) {
+export default function TransactionList() {
   const [filters, setFilters] = useState({ type: "all", search: "" });
-  const [transaction, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const loaderRef = useRef(null);
 
   useEffect(() => {
-    fetch(`/api/transactions?page=${page}&limit=10`)
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchTransactions = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/transactions?page=${page}&limit=10`);
+        const data = await res.json();
+        if (data.length < 10) setHasMore(false);
         setTransactions((prev) => [...prev, ...data]);
-      });
+      } catch (err) {
+        console.error("Transaction fetch failed:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
   }, [page]);
 
-  const filtered = useMemo(() => {
-    return transactions?.filter((tx) => {
-      const matchType = filters.type === "all" || tx.type === filters.type;
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
 
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading]);
+
+  const filtered = useMemo(() => {
+    return transactions.filter((tx) => {
+      const matchType = filters.type === "all" || tx.type === filters.type;
       const desc = tx.description ?? "";
-      const matchSearch = desc
-        .toLowerCase()
-        .includes(filters.search.toLowerCase());
+      const matchSearch = desc.toLowerCase().includes(filters.search.toLowerCase());
 
       const txDate = tx.date ? new Date(tx.date) : null;
-      const matchStart = filters.startDate
-        ? txDate && txDate >= new Date(filters.startDate)
-        : true;
-      const matchEnd = filters.endDate
-        ? txDate && txDate <= new Date(filters.endDate)
-        : true;
+      const matchStart = filters.startDate ? txDate && txDate >= new Date(filters.startDate) : true;
+      const matchEnd = filters.endDate ? txDate && txDate <= new Date(filters.endDate) : true;
 
       return matchType && matchSearch && matchStart && matchEnd;
     });
@@ -40,13 +61,11 @@ export default function TransactionList({transactions}) {
     <section className="space-y-4">
       <TransactionFilter onFilter={setFilters} />
 
-      {filtered?.length === 0 ? (
-        <p className="text-gray-400 mt-4">
-          Ingen transaksjoner matcher filteret.
-        </p>
+      {filtered.length === 0 ? (
+        <p className="text-gray-400 mt-4">Ingen transaksjoner matcher filteret.</p>
       ) : (
         <ul className="space-y-2">
-          {filtered?.map((tx) => {
+          {filtered.map((tx) => {
             const formattedDate = tx.date
               ? new Date(tx.date).toLocaleDateString("no-NO", {
                   day: "2-digit",
@@ -98,12 +117,10 @@ export default function TransactionList({transactions}) {
           })}
         </ul>
       )}
-      <button
-        onClick={() => setPage((prev) => prev + 1)}
-        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Last inn mer
-      </button>
+
+      <div ref={loaderRef} className="h-10 flex justify-center items-center mt-4">
+        {loading && <span className="text-gray-400">Laster inn flere transaksjoner…</span>}
+      </div>
     </section>
   );
 }
